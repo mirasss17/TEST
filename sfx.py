@@ -61,6 +61,21 @@ def thud(dur=0.25):
     return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 14)
 
 
+def impact(dur=1.6):
+    """Низкий удар с шумовым хвостом — для драматических моментов."""
+    t = t_(dur)
+    f = 70 * (32 / 70) ** (t / dur)
+    boom = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 3.2)
+    tail = lowpass(rng.standard_normal(len(t)), np.linspace(2500, 200, len(t))) * np.exp(-t * 5) * 0.6
+    return (boom + tail) * np.minimum(1, t / 0.003)
+
+
+def kick():
+    t = t_(0.16)
+    f = 120 * (45 / 120) ** (t / 0.16)
+    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 24)
+
+
 def click():
     t = t_(0.06)
     k = tick()
@@ -102,24 +117,66 @@ def build(project):
         mix[i:i + len(sig), 0] += sig * gain * left
         mix[i:i + len(sig), 1] += sig * gain * right
 
-    # Музыка: мягкий пэд, бас и арпеджио, 104 удара в минуту.
+    # Музыка. Настроение задают метки mood: calm (по умолчанию), dark (тревога), hero (подъём).
+    moods = sorted((c["t"], c["mode"]) for c in data["cues"] if c["type"] == "mood")
+
+    def mood_at(t):
+        cur = "calm"
+        for mt, mode in moods:
+            if mt <= t + 0.01:
+                cur = mode
+        return cur
+
     beat = 60 / 104
     bar = beat * 4
-    chords = [
+    bright = [
         [174.61, 220.00, 261.63, 329.63],  # Fmaj7
         [220.00, 261.63, 329.63, 392.00],  # Am7
         [146.83, 220.00, 261.63, 349.23],  # Dm7
         [196.00, 246.94, 293.66, 392.00],  # G
     ]
+    grim = [
+        [146.83, 174.61, 220.00],  # Dm
+        [116.54, 146.83, 174.61],  # Bb
+        [98.00, 116.54, 146.83],   # Gm
+        [110.00, 138.59, 164.81],  # A
+    ]
     order = [0, 2, 1, 3, 2, 3, 1, 2]
-    for b in range(int(np.ceil(total / bar))):
-        ch = chords[b % 4]
-        put(pad(ch, bar + 0.6), b * bar, 0.085)
-        put(pad([ch[0] / 2], bar + 0.3), b * bar, 0.10)
-        if b >= 2:  # арпеджио вступает с третьего такта
-            octave = 4 if (b // 4) % 2 else 2
-            for k in range(8):
-                put(pluck(ch[order[k]] * octave), b * bar + k * beat / 2, 0.05, pan=0.5 if k % 2 else -0.5)
+    half = bar / 2
+    for h in range(int(np.ceil(total / half))):   # шаг — полтакта, чтобы настроение менялось быстро
+        at = h * half
+        mode = mood_at(at)
+        b = h // 2
+        if mode == "dark":
+            ch = grim[b % 4]
+            put(pad(ch, half + 0.5), at, 0.10)
+            put(pad([36.71 * 2, 36.71 * 3], half + 0.5), at, 0.16)      # низкий гул
+            put(thud(0.2), at, 0.34)                                    # сердцебиение
+            put(thud(0.2), at + 0.27, 0.22)
+        else:
+            ch = bright[b % 4]
+            put(pad(ch, half + 0.5), at, 0.085 if mode == "calm" else 0.10)
+            put(pad([ch[0] / 2], half + 0.3), at, 0.10)
+            hero = mode == "hero"
+            if hero or b >= 2:
+                for k in range(4):
+                    kk = k + (h % 2) * 4
+                    put(pluck(ch[order[kk]] * 2), at + k * beat / 2, 0.05, pan=0.5 if kk % 2 else -0.5)
+                    if hero:
+                        put(pluck(ch[order[(kk + 3) % 8]] * 4), at + k * beat / 2, 0.035, pan=-0.5 if kk % 2 else 0.5)
+            if hero:
+                put(kick(), at, 0.30)
+                put(kick(), at + beat, 0.24)
+                put(tick(), at + beat / 2, 0.05)
+                put(tick(), at + beat * 1.5, 0.05)
+
+    # Метка cut: музыка резко замолкает и плавно возвращается.
+    tt = np.arange(size) / SR
+    for c in data["cues"]:
+        if c["type"] == "cut":
+            t0, d = c["t"], c.get("dur", 1.0)
+            env = np.clip((t0 - tt) / 0.04, 0, 1) + np.clip((tt - t0 - d) / 0.6, 0, 1)
+            music *= np.clip(env, 0, 1)[:, None]
 
     # Эффекты по меткам.
     bus["cur"] = fx
@@ -139,6 +196,10 @@ def build(project):
                 put(tick(), at + c.get("dur", 1.0) * j / n, gain * (0.8 + 0.4 * rng.random()), pan)
         elif kind == "ding":
             put(ding(c.get("f", 1046.5)), at, gain, pan)
+        elif kind == "impact":
+            put(impact(), at, gain, pan)
+        elif kind in ("mood", "cut"):
+            pass
         elif kind == "thud":
             put(thud(), at, gain, pan)
         elif kind == "click":
