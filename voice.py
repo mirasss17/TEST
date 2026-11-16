@@ -21,16 +21,18 @@ MODEL = os.path.join(ROOT, ".voices", "vits-piper-ru_RU-ruslan-medium")
 
 def eleven(text, path, opt, prev_text, next_text):
     """Фраза через ElevenLabs. Ключ подставляет сетевой прокси среды, в коде его нет."""
-    body = {
-        "text": text,
-        "model_id": opt.get("model_id", "eleven_multilingual_v2"),
-        "voice_settings": {"stability": opt.get("stability", 0.35), "similarity_boost": opt.get("similarity_boost", 0.8),
-                           "style": opt.get("style", 0.45), "use_speaker_boost": True, "speed": opt.get("speed", 1.0)},
-    }
-    if prev_text:
-        body["previous_text"] = prev_text   # соседние фразы — чтобы интонация была связной
-    if next_text:
-        body["next_text"] = next_text
+    model = opt.get("model_id", "eleven_multilingual_v2")
+    body = {"text": text, "model_id": model}
+    if model == "eleven_v3":   # v3: понимает метки интонации в [скобках], соседние фразы не принимает
+        body["language_code"] = opt.get("language_code", "ru")
+        body["voice_settings"] = {"stability": opt.get("stability", 0.5)}
+    else:
+        body["voice_settings"] = {"stability": opt.get("stability", 0.35), "similarity_boost": opt.get("similarity_boost", 0.8),
+                                  "style": opt.get("style", 0.45), "use_speaker_boost": True, "speed": opt.get("speed", 1.0)}
+        if prev_text:
+            body["previous_text"] = prev_text   # соседние фразы — чтобы интонация была связной
+        if next_text:
+            body["next_text"] = next_text
     mp3 = path[:-4] + ".mp3"
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{opt['voice_id']}?output_format=mp3_44100_128"
     code = subprocess.run(["curl", "-sS", "-m", "120", "-o", mp3, "-w", "%{http_code}", "-X", "POST", url,
@@ -64,13 +66,14 @@ def main(project):
         if engine == "elevenlabs":
             opt = cfg["elevenlabs"]
             # Кэш: фразу не генерируем заново (и не тратим символы), пока не менялись текст и настройки.
-            key = hashlib.sha1(json.dumps([line["text"], opt], ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+            say = line.get("say", line["text"])   # say — текст для диктора с метками интонации
+            key = hashlib.sha1(json.dumps([say, opt], ensure_ascii=False, sort_keys=True).encode()).hexdigest()
             stamp = path[:-4] + ".key"
             raw = path[:-4] + ".raw.wav"
             if os.path.exists(raw) and os.path.exists(stamp) and open(stamp).read() == key:
                 x, rate = sf.read(raw, dtype="float32")
             else:
-                x, rate = eleven(line["text"], raw, opt, " ".join(texts[max(0, idx - 2):idx]), " ".join(texts[idx + 1:idx + 2]))
+                x, rate = eleven(say, raw, opt, " ".join(texts[max(0, idx - 2):idx]), " ".join(texts[idx + 1:idx + 2]))
                 open(stamp, "w").write(key)
         else:
             chunks = list(voice.synthesize(line["text"], syn_config=syn))
