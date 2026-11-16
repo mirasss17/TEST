@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>kazpost-01</title>
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+  /* сцена 1: карта-схема */
+  #map { left: 80px; top: 800px; width: 920px; height: 540px; overflow: hidden; }
+  #map .lab { position: absolute; left: 44px; top: 34px; font-size: 34px; font-weight: 600; color: var(--grey); display: flex; align-items: center; gap: 14px; }
+  #map .v { position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); }
+  #map .v.big { width: 30px; height: 30px; background: var(--hot); border: 5px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,.15); }
+  #ruler { position: absolute; left: 60px; right: 60px; bottom: 92px; height: 6px; border-radius: 6px; background: var(--ink); transform-origin: left center; }
+  #ruler::before, #ruler::after { content: ""; position: absolute; top: -14px; width: 6px; height: 34px; border-radius: 6px; background: var(--ink); }
+  #ruler::before { left: 0; } #ruler::after { right: 0; }
+  #km { position: absolute; left: 0; right: 0; bottom: 22px; text-align: center; font-size: 46px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  #s1 .row-center { top: 1400px; }
+
+  /* сцена 3: название */
+  #s3 .small { top: 560px; font-size: 50px; }
+  #name { top: 640px; font-size: 190px; font-weight: 800; letter-spacing: -0.045em; line-height: 1.1; }
+  #under { left: 170px; top: 852px; width: 740px; height: 22px; border-radius: 22px; background: var(--hot); transform-origin: left center; }
+  #s3 .tag { top: 930px; font-size: 48px; }
+  #s3 .row-center { top: 1080px; }
+
+  /* сцена 5: путь посылки */
+  #route { left: 80px; top: 610px; width: 920px; height: 900px; }
+  #route .track { position: absolute; left: 104px; top: 110px; width: 12px; height: 680px; border-radius: 12px; background: var(--line); }
+  #route .fill { position: absolute; left: 104px; top: 110px; width: 12px; height: 680px; border-radius: 12px; background: var(--accent); transform-origin: center top; }
+  #route .node { position: absolute; left: 76px; width: 68px; height: 68px; margin-top: -34px; border-radius: 50%; background: #fff; border: 8px solid var(--line); }
+  #route .on { position: absolute; left: 76px; width: 68px; height: 68px; margin-top: -34px; border-radius: 50%; background: var(--accent); border: 8px solid #fff; box-shadow: 0 6px 16px rgba(var(--glow), .45); }
+  #route .txt { position: absolute; left: 190px; right: 40px; margin-top: -52px; }
+  #route .txt b { display: block; font-size: 56px; font-weight: 800; letter-spacing: -0.03em; }
+  #route .txt span { display: block; font-size: 34px; color: var(--grey); font-weight: 500; margin-top: 4px; }
+  #parcel { position: absolute; left: 74px; top: 74px; width: 72px; height: 72px; border-radius: 20px; background: var(--hot); border: 6px solid #fff; box-shadow: 0 10px 22px rgba(0,0,0,.2); display: grid; place-items: center; }
+  #parcel svg { width: 40px; height: 40px; fill: none; stroke: var(--ink); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+  #s5 .row-center { top: 1550px; }
+
+  /* сцена 7: температура */
+  #temp { left: 80px; top: 620px; width: 920px; height: 430px; padding: 44px 52px; }
+  #deg { font-size: 210px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; color: #1f8fff; }
+  #temp .labs { position: absolute; right: 56px; top: 70px; font-size: 56px; font-weight: 800; }
+  #temp .labs div { position: absolute; right: 0; top: 0; white-space: nowrap; }
+  #tbar { position: absolute; left: 52px; right: 52px; bottom: 54px; height: 30px; border-radius: 30px; background: linear-gradient(90deg, #1f8fff, #9fd0ff 45%, #ffd27a 55%, #ff7a1a); }
+  #tknob { position: absolute; left: 52px; bottom: 40px; width: 58px; height: 58px; border-radius: 50%; background: #fff; border: 8px solid var(--ink); box-shadow: 0 6px 14px rgba(0,0,0,.2); }
+  #s7 .stat { top: 1090px; }
+  #s7 .row-center { top: 1475px; }
+
+  /* сцена 8: сеть */
+  #net { left: 80px; top: 760px; width: 920px; height: 560px; }
+  #net line { stroke: var(--accent); stroke-width: 6; stroke-linecap: round; opacity: .55; }
+  #net circle { fill: #fff; stroke: var(--accent); stroke-width: 7; }
+  #net circle.hub { fill: var(--hot); stroke: #fff; stroke-width: 8; }
+  #s8 .last { top: 1370px; font-size: 54px; font-weight: 700; color: var(--ink); }
+  #s8 .row-center { top: 1500px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="glow"></div>
+
+  <!-- 1. Страна огромная -->
+  <div class="scene" id="s1">
+    <div class="pill abs" id="p1" style="left:80px; top:200px"><span class="dot"></span>Объясняю просто</div>
+    <div class="h"><div class="w">Казахстан —</div><div class="w acc">огромный.</div></div>
+    <div class="card abs" id="map">
+      <div class="lab"><span class="dot"></span>города и сёла</div>
+      <div id="ruler"></div>
+      <div id="km">0 км</div>
+    </div>
+    <div class="row-center"><div class="pill dark" id="p1b">9-я страна в мире по площади</div></div>
+  </div>
+
+  <!-- 2. Везде кто-то ждёт -->
+  <div class="scene" id="s2">
+    <div class="h"><div class="w">И везде</div><div class="w">кто-то <span class="acc">ждёт.</span></div></div>
+    <div class="card item" style="top:640px"><div class="ic" data-icon="box"></div><div><div class="t">Посылку</div><div class="d">из интернет-магазина</div></div></div>
+    <div class="card item" style="top:910px"><div class="ic" data-icon="mail"></div><div><div class="t">Письмо</div><div class="d">от родных из другого города</div></div></div>
+    <div class="card item" style="top:1180px"><div class="ic" data-icon="money"></div><div><div class="t">Пенсию</div><div class="d">бабушка в далёком ауле</div></div></div>
+    <div class="row-center" style="top:1480px"><div class="pill blue" id="q2" style="font-size:46px; padding:24px 44px">А кто всё это везёт?</div></div>
+  </div>
+
+  <!-- 3. Казпочта -->
+  <div class="scene" id="s3">
+    <div class="abs center sub small" id="s3a">это делает</div>
+    <div class="abs center" id="name">Казпочта</div>
+    <div class="abs" id="under"></div>
+    <div class="abs center sub tag" id="s3b">национальная почта Казахстана</div>
+    <div class="row-center"><div class="pill tg">посылки</div><div class="pill tg">письма</div><div class="pill tg">деньги</div><div class="pill tg">газеты</div></div>
+  </div>
+
+  <!-- 4. Масштаб -->
+  <div class="scene" id="s4">
+    <div class="h"><div class="w">Масштаб</div></div>
+    <div class="card stat" style="top:540px"><div class="n" id="n1">0 млн</div><div class="l">посылок за год</div><div class="d">почти по одной на каждого жителя страны</div></div>
+    <div class="card stat" style="top:885px"><div class="n" id="n2">0</div><div class="l">отделений</div><div class="d">в больших городах и в самых дальних сёлах</div></div>
+    <div class="card stat" style="top:1230px"><div class="n" id="n3">0</div><div class="l">сотрудников</div><div class="d">почтальоны, сортировщики, водители</div></div>
+  </div>
+
+  <!-- 5. Путь одной посылки -->
+  <div class="scene" id="s5">
+    <div class="h"><div class="w">Путь одной</div><div class="w acc">посылки</div></div>
+    <div class="card abs" id="route">
+      <div class="track"></div><div class="fill"></div>
+      <div class="node" style="top:110px"></div><div class="node" style="top:337px"></div><div class="node" style="top:563px"></div><div class="node" style="top:790px"></div>
+      <div class="on" style="top:110px"></div><div class="on" style="top:337px"></div><div class="on" style="top:563px"></div><div class="on" style="top:790px"></div>
+      <div class="txt" style="top:110px"><b>Приняли</b><span>в отделении почты</span></div>
+      <div class="txt" style="top:337px"><b>Отсортировали</b><span>нашли, в какой город ей ехать</span></div>
+      <div class="txt" style="top:563px"><b>Повезли</b><span>самолётом, поездом, машиной</span></div>
+      <div class="txt" style="top:790px"><b>Принесли</b><span>прямо в руки</span></div>
+      <div id="parcel"><svg viewBox="0 0 64 64"><path d="M8 22 L32 10 L56 22 L56 46 L32 58 L8 46 Z M8 22 L32 34 L56 22 M32 34 L32 58"/></svg></div>
+    </div>
+    <div class="row-center"><div class="pill dark" id="p5" style="font-size:42px">и так — 20 миллионов раз в год</div></div>
+  </div>
+
+  <!-- 6. Не только посылки -->
+  <div class="scene" id="s6">
+    <div class="h"><div class="w">Не только</div><div class="w acc">посылки</div></div>
+    <div class="card item" style="top:640px"><div class="ic" data-icon="home"></div><div><div class="t">Пенсии</div><div class="d">приносят пожилым прямо домой</div></div></div>
+    <div class="card item" style="top:910px"><div class="ic" data-icon="news"></div><div><div class="t">Письма и газеты</div><div class="d">десятки миллионов в год</div></div></div>
+    <div class="card item" style="top:1180px"><div class="ic" data-icon="money"></div><div><div class="t">Платежи и переводы</div><div class="d">даже в маленьком селе</div></div></div>
+  </div>
+
+  <!-- 7. Нелёгкая работа -->
+  <div class="scene" id="s7">
+    <div class="h"><div class="w">Это нелёгкая</div><div class="w acc">работа</div></div>
+    <div class="card abs" id="temp">
+      <div id="deg">−40°</div>
+      <div class="labs"><div id="cold" style="color:#1f8fff">мороз</div><div id="heat" style="color:#ff7a1a">жара</div></div>
+      <div id="tbar"></div><div id="tknob"></div>
+    </div>
+    <div class="card stat"><div class="n" id="n7">0</div><div class="l">адресов у одного почтальона</div><div class="d">столько обходит почтальон в столице</div></div>
+    <div class="row-center"><div class="pill blue" id="p7" style="font-size:46px; padding:24px 44px">А почта всё равно приходит.</div></div>
+  </div>
+
+  <!-- 8. Финал -->
+  <div class="scene" id="s8">
+    <div class="h"><div class="w">Без почты</div><div class="w">страна</div><div class="w acc">не связана.</div></div>
+    <svg class="abs" id="net" viewBox="0 0 920 560"></svg>
+    <div class="abs center last" id="s8a">Казпочта соединяет всех нас.</div>
+    <div class="row-center"><div class="pill dark" id="p8" style="font-size:42px">Спасибо почтальонам</div></div>
+  </div>
+</div>
+
+<script src="../node_modules/gsap/dist/gsap.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script>
+  const { tl, cue } = K;
+
+  // ---------- 1. Страна огромная (0 – 4.6) ----------
+  K.scene("#s1", 0);
+  K.pop("#p1", 0.15);
+  K.up("#s1 .w", 0.35);
+  K.card("#map", 1.0);
+  // Точки-сёла: положение задано формулой, чтобы каждый рендер был одинаковым.
+  const map = document.querySelector("#map");
+  let seed = 11;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 44; i++) {
+    const v = document.createElement("div");
+    v.className = "v" + (i % 11 === 0 ? " big" : "");
+    v.style.left = 50 + rnd() * 800 + "px";
+    v.style.top = 110 + rnd() * 280 + "px";
+    map.appendChild(v);
+  }
+  tl.from("#map .v", { scale: 0, duration: 0.35, ease: "back.out(3)", stagger: 0.022 }, 1.4);
+  cue("ticks", 1.4, { dur: 1.0, n: 16, gain: 0.1 });
+  tl.from("#ruler", { scaleX: 0, duration: 1.0, ease: "power2.inOut" }, 2.2);
+  K.count("#km", 3000, 2.2, 1.0, { suffix: " км", ease: "power2.inOut", origin: "center center" });
+  K.pop("#p1b", 3.4);
+  K.out("#s1", 4.3);
+
+  // ---------- 2. Везде кто-то ждёт (4.6 – 9.4) ----------
+  K.scene("#s2", 4.6);
+  K.up("#s2 .w", 4.65);
+  K.card("#s2 .item", 5.2, { stagger: 0.55 });
+  tl.from("#s2 .ic", { scale: 0.3, rotation: -25, duration: 0.5, ease: "back.out(3)", stagger: 0.55 }, 5.35);
+  K.pop("#q2", 7.4);
+  tl.to("#q2", { scale: 1.06, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 3 }, 7.95);
+  K.out("#s2", 9.1);
+
+  // ---------- 3. Казпочта (9.4 – 13.2) ----------
+  K.scene("#s3", 9.4);
+  K.up("#s3a", 9.45, { y: 40 });
+  tl.from("#name", { scale: 0.55, opacity: 0, duration: 0.65, ease: "back.out(2)" }, 9.8);
+  cue("thud", 9.8, { gain: 0.8 });
+  cue("ding", 9.84, { f: 523.25, gain: 0.24 });
+  tl.from("#under", { scaleX: 0, duration: 0.45, ease: "power3.out" }, 10.35);
+  cue("whoosh", 10.33, { gain: 0.34 });
+  K.up("#s3b", 10.7, { y: 40 });
+  K.pop("#s3 .tg", 11.2, { stagger: 0.14 });
+  K.out("#s3", 12.9);
+
+  // ---------- 4. Масштаб (13.2 – 21.6) ----------
+  K.scene("#s4", 13.2);
+  K.up("#s4 .w", 13.25);
+  const stats = document.querySelectorAll("#s4 .stat");
+  [13.8, 15.9, 18.0].forEach((t, i) => K.card(stats[i], t));
+  K.count("#n1", 20, 14.0, 1.2, { suffix: " млн", f: 783.99 });
+  K.count("#n2", 2000, 16.1, 1.2, { suffix: "+", f: 880 });
+  K.count("#n3", 20000, 18.2, 1.3, { prefix: "≈ ", f: 1046.5 });
+  K.out("#s4", 21.3);
+
+  // ---------- 5. Путь одной посылки (21.6 – 29.6) ----------
+  K.scene("#s5", 21.6);
+  K.up("#s5 .w", 21.65);
+  K.card("#route", 22.1);
+  const ons = document.querySelectorAll("#route .on"), txts = document.querySelectorAll("#route .txt");
+  gsap.set(ons, { scale: 0 });
+  gsap.set(txts, { opacity: 0.3 });
+  gsap.set("#route .fill", { scaleY: 0 });
+  const stops = [22.9, 24.5, 26.1, 27.7], ys = [0, 227, 453, 680];
+  stops.forEach((t, i) => {
+    tl.to(ons[i], { scale: 1, duration: 0.4, ease: "back.out(3)" }, t);
+    tl.to(txts[i], { opacity: 1, x: 10, duration: 0.3, ease: "power2.out" }, t);
+    cue("ding", t, { f: [659.25, 783.99, 880, 1046.5][i], gain: 0.28 });
+    cue("pop", t, { gain: 0.3, pitch: 1.3 });
+    if (i < 3) {
+      tl.to("#parcel", { y: ys[i + 1], duration: 1.1, ease: "power2.inOut" }, t + 0.45);
+      tl.to("#route .fill", { scaleY: ys[i + 1] / 680, duration: 1.1, ease: "power2.inOut" }, t + 0.45);
+      cue("whoosh", t + 0.5, { gain: 0.2 });
+    }
+  });
+  tl.to("#parcel", { scale: 1.25, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }, 27.7);
+  K.pop("#p5", 28.3);
+  K.out("#s5", 29.3);
+
+  // ---------- 6. Не только посылки (29.6 – 36.6) ----------
+  K.scene("#s6", 29.6);
+  K.up("#s6 .w", 29.65);
+  K.card("#s6 .item", 30.4, { stagger: 1.4 });
+  tl.from("#s6 .ic", { scale: 0.3, rotation: -25, duration: 0.5, ease: "back.out(3)", stagger: 1.4 }, 30.55);
+  K.out("#s6", 36.3);
+
+  // ---------- 7. Нелёгкая работа (36.6 – 43.6) ----------
+  K.scene("#s7", 36.6);
+  K.up("#s7 .w", 36.65);
+  K.card("#temp", 37.2);
+  gsap.set("#heat", { opacity: 0, y: 20 });
+  const sign = (n) => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(Math.round(n)) + "°";
+  K.count("#deg", 40, 38.0, 1.8, { from: -40, show: sign, ease: "power2.inOut", f: 987.77 });
+  cue("riser", 38.0, { dur: 1.8, gain: 0.22 });
+  tl.to("#deg", { color: "#ff7a1a", duration: 1.8, ease: "power2.inOut" }, 38.0);
+  tl.to("#tknob", { x: 758, duration: 1.8, ease: "power2.inOut" }, 38.0);
+  tl.to("#cold", { opacity: 0, y: -20, duration: 0.3 }, 38.75);
+  tl.to("#heat", { opacity: 1, y: 0, duration: 0.3 }, 38.95);
+  K.card("#s7 .stat", 40.2);
+  K.count("#n7", 1000, 40.4, 1.1, { suffix: "+", f: 880 });
+  K.pop("#p7", 42.0);
+  K.out("#s7", 43.3);
+
+  // ---------- 8. Финал (43.6 – 50) ----------
+  K.scene("#s8", 43.6);
+  K.up("#s8 .w", 43.65);
+  const N = [[90,120],[300,60],[520,150],[760,70],[860,260],[640,330],[400,300],[180,330],[280,490],[560,500],[800,470]];
+  const E = [[6,1],[6,2],[6,7],[6,8],[6,9],[6,5],[0,1],[1,2],[2,3],[3,4],[2,5],[5,4],[0,7],[7,8],[5,9],[9,10],[4,10]];
+  const net = document.querySelector("#net"), NS = "http://www.w3.org/2000/svg";
+  E.forEach(([a, b]) => {
+    const l = document.createElementNS(NS, "line");
+    l.setAttribute("x1", N[a][0]); l.setAttribute("y1", N[a][1]); l.setAttribute("x2", N[b][0]); l.setAttribute("y2", N[b][1]);
+    const len = Math.hypot(N[a][0] - N[b][0], N[a][1] - N[b][1]);
+    l.style.strokeDasharray = len; l.style.strokeDashoffset = len;
+    net.appendChild(l);
+  });
+  N.forEach(([x, y], i) => {
+    const c = document.createElementNS(NS, "circle");
+    c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", i === 6 ? 34 : 20);
+    if (i === 6) c.setAttribute("class", "hub");
+    c.style.transformOrigin = `${x}px ${y}px`;
+    net.appendChild(c);
+  });
+  tl.from("#net circle.hub", { scale: 0, duration: 0.5, ease: "back.out(3)" }, 44.5);
+  cue("thud", 44.5, { gain: 0.6 });
+  tl.to("#net line", { strokeDashoffset: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }, 44.8);
+  tl.from("#net circle:not(.hub)", { scale: 0, duration: 0.4, ease: "back.out(3)", stagger: 0.14 }, 45.1);
+  for (let i = 0; i < 10; i++) cue("pop", 45.1 + i * 0.14, { gain: 0.22, pitch: 1.2 + i * 0.08, pan: -0.5 + i * 0.1 });
+  tl.to("#net circle.hub", { scale: 1.25, duration: 0.5, ease: "sine.inOut", yoyo: true, repeat: 5 }, 46.6);
+  K.up("#s8a", 47.0, { y: 40 });
+  cue("ding", 47.0, { f: 523.25, gain: 0.26 });
+  cue("ding", 47.05, { f: 783.99, gain: 0.2 });
+  K.pop("#p8", 47.9);
+
+  K.done(50);
+</script>
+</body>
+</html>

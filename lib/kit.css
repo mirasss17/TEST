@@ -1,0 +1,46 @@
+/* Общий стиль роликов: светлый фон, свечение, белые карточки, жирный гротеск. */
+:root {
+  --bg: #f5f7fb;
+  --ink: #0f1220;
+  --grey: #8a8f9c;
+  --line: #e6e9f0;
+  --accent: #1f5bff;
+  --accent-soft: #e3ebff;
+  --hot: #ffc21a;
+  --card: #ffffff;
+  --glow: 31, 91, 255;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+body { font-family: "Inter Display", "Inter", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+#glow {
+  position: absolute; left: -260px; top: 120px; width: 1600px; height: 1600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--glow), .24) 0%, rgba(var(--glow), .09) 34%, rgba(var(--glow), 0) 62%);
+}
+.scene { position: absolute; inset: 0; visibility: hidden; opacity: 0; }
+.abs { position: absolute; }
+.card { background: var(--card); border: 2px solid var(--line); border-radius: 44px; box-shadow: 0 30px 70px rgba(15, 25, 60, .08), 0 4px 12px rgba(15, 25, 60, .04); }
+.pill { display: inline-flex; align-items: center; gap: 16px; background: var(--card); border: 2px solid var(--line); border-radius: 999px; padding: 18px 34px; font-size: 38px; font-weight: 600; box-shadow: 0 12px 30px rgba(15, 25, 60, .06); white-space: nowrap; }
+.pill.dark { background: var(--ink); color: #fff; border-color: var(--ink); }
+.pill.blue { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 20px 40px rgba(var(--glow), .3); }
+.dot { width: 20px; height: 20px; border-radius: 50%; background: var(--accent); flex: none; }
+.h { position: absolute; left: 80px; right: 60px; top: 310px; font-size: 124px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.04; }
+.h div { white-space: nowrap; }
+.acc { color: var(--accent); }
+.sub { color: var(--grey); font-weight: 500; }
+.center { left: 0; right: 0; text-align: center; }
+.row-center { position: absolute; left: 0; right: 0; display: flex; justify-content: center; gap: 22px; }
+
+/* Карточка-строка: иконка, заголовок, пояснение */
+.item { position: absolute; left: 80px; width: 920px; height: 250px; display: flex; align-items: center; padding: 0 48px; gap: 40px; }
+.item .ic { width: 124px; height: 124px; border-radius: 34px; background: var(--accent-soft); display: grid; place-items: center; flex: none; }
+.item .ic svg { width: 72px; height: 72px; fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.item .t { font-size: 62px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
+.item .d { font-size: 36px; color: var(--grey); font-weight: 500; margin-top: 10px; line-height: 1.2; }
+
+/* Карточка с большой цифрой */
+.stat { position: absolute; left: 80px; width: 920px; height: 325px; padding: 38px 52px; }
+.stat .n { font-size: 132px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stat .l { font-size: 46px; font-weight: 700; margin-top: 10px; }
+.stat .d { font-size: 34px; color: var(--grey); font-weight: 500; margin-top: 6px; }

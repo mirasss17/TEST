@@ -1,2 +1,3 @@
 node_modules/
-demo-*/sound.wav
+*/sound.wav
+*/cues.json
