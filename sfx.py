@@ -90,10 +90,14 @@ def build(project):
     with open(os.path.join(project, "cues.json"), encoding="utf-8") as f:
         data = json.load(f)
     total = float(data["duration"])
-    mix = np.zeros((int(SR * (total + 6)), 2))
+    size = int(SR * (total + 6))
+    music, fx, voice = np.zeros((size, 2)), np.zeros((size, 2)), np.zeros((size, 2))
+    bus = {"cur": music}
 
     def put(sig, at, gain=1.0, pan=0.0):
         i = int(max(0, at) * SR)
+        mix = bus["cur"]
+        sig = sig[: size - i]
         left, right = np.cos((pan + 1) * np.pi / 4), np.sin((pan + 1) * np.pi / 4)
         mix[i:i + len(sig), 0] += sig * gain * left
         mix[i:i + len(sig), 1] += sig * gain * right
@@ -118,6 +122,7 @@ def build(project):
                 put(pluck(ch[order[k]] * octave), b * bar + k * beat / 2, 0.05, pan=0.5 if k % 2 else -0.5)
 
     # Эффекты по меткам.
+    bus["cur"] = fx
     for i, c in enumerate(data["cues"]):
         kind, at, gain, pan = c["type"], c["t"], c.get("gain", 0.4), c.get("pan", 0.0)
         if kind == "whoosh":
@@ -143,10 +148,26 @@ def build(project):
         else:
             print("неизвестная метка:", kind)
 
+    # Голос за кадром: если есть voice.json, кладём фразы и приглушаем музыку с эффектами.
+    voice_path = os.path.join(project, "voice.json")
+    has_voice = os.path.exists(voice_path)
+    if has_voice:
+        import soundfile as sf
+        bus["cur"] = voice
+        with open(voice_path, encoding="utf-8") as f:
+            for item in json.load(f):
+                x, rate = sf.read(os.path.join(project, item["file"]), dtype="float32")
+                n = int(len(x) * SR / rate)
+                put(np.interp(np.arange(n) * rate / SR, np.arange(len(x)), x), item["t"], 1.0)
+        voice /= max(1e-6, np.max(np.abs(voice))) / 0.8
+        mix = voice + music * 0.5 + fx * 0.5
+    else:
+        mix = music + fx
+
     out = mix[: int(SR * total)]
     t = np.arange(len(out)) / SR
     fade = np.minimum(1, t / 0.15) * np.minimum(1, (total - t) / 0.8)
-    out = np.tanh(out * 1.6) * fade[:, None]
+    out = np.tanh(out * (1.25 if has_voice else 1.6)) * fade[:, None]
     out = out / np.max(np.abs(out)) * 0.89
     path = os.path.join(project, "sound.wav")
     with wave.open(path, "wb") as w:

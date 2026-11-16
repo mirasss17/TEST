@@ -1,3 +1,6 @@
 node_modules/
+.voices/
 */sound.wav
 */cues.json
+*/voice.json
+*/vo/
