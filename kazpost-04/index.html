@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>kazpost-04</title>
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+  :root { --red: #ff4a3d; --green: #1fbf63; }
+  .h { top: 240px; }
+  #glow2 { position: absolute; left: -260px; top: 120px; width: 1600px; height: 1600px; border-radius: 50%; opacity: 0;
+    background: radial-gradient(circle, rgba(255,74,61,.26) 0%, rgba(255,74,61,.10) 34%, rgba(255,74,61,0) 62%); }
+  .redtxt { color: var(--red); }
+  .item > div:nth-child(2) { flex: 1; }
+  .badge { width: 92px; height: 92px; border-radius: 50%; flex: none; display: grid; place-items: center; background: var(--red); box-shadow: 0 10px 22px rgba(255,74,61,.35); }
+  .badge.ok { background: var(--accent); box-shadow: 0 10px 22px rgba(var(--glow), .35); }
+  .badge svg { width: 48px; height: 48px; fill: none; stroke: #fff; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* субтитры */
+  .cap { position: absolute; left: 70px; right: 70px; top: 1490px; text-align: center; visibility: hidden; opacity: 0; }
+  .cap span { display: inline; border: 2px solid rgba(255,255,255,.16); background: #0b0d16; color: #fff; font-size: 42px; font-weight: 700; line-height: 1.52; padding: 8px 20px; border-radius: 16px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+  /* выключатель */
+  .sw { position: relative; width: 220px; height: 120px; border-radius: 60px; background: var(--green); flex: none; }
+  .sw i { position: absolute; left: 8px; top: 8px; width: 104px; height: 104px; border-radius: 50%; background: #fff; box-shadow: 0 6px 14px rgba(0,0,0,.25); }
+  #power { left: 80px; top: 600px; width: 920px; height: 330px; display: flex; align-items: center; padding: 0 56px; gap: 30px; }
+  #power .nm { font-size: 84px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; }
+  #power .st { position: relative; height: 52px; margin-top: 10px; font-size: 40px; font-weight: 700; }
+  #power .st div { position: absolute; left: 0; top: 0; white-space: nowrap; }
+  #power > div:first-child { flex: 1; }
+  #s1 .row-center { top: 1010px; }
+
+  /* сцена 4 */
+  .big { position: absolute; left: 0; right: 0; top: 400px; text-align: center; font-size: 120px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.06; }
+  #sw2wrap { position: absolute; left: 0; right: 0; top: 880px; display: flex; flex-direction: column; align-items: center; gap: 50px; }
+  #sw2wrap .sw { transform: scale(1.7); margin: 50px 0; }
+  #s4lab { font-size: 50px; font-weight: 700; color: var(--green); }
+
+  /* температура */
+  #temp { left: 80px; top: 790px; width: 920px; height: 400px; padding: 40px 52px; }
+  #deg { font-size: 190px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; color: #1f8fff; }
+  #temp .labs { position: absolute; right: 56px; top: 64px; font-size: 56px; font-weight: 800; }
+  #temp .labs div { position: absolute; right: 0; top: 0; white-space: nowrap; }
+  #tbar { position: absolute; left: 52px; right: 52px; bottom: 50px; height: 30px; border-radius: 30px; background: linear-gradient(90deg, #1f8fff, #9fd0ff 45%, #ffd27a 55%, #ff7a1a); }
+  #tknob { position: absolute; left: 52px; bottom: 36px; width: 58px; height: 58px; border-radius: 50%; background: #fff; border: 8px solid var(--ink); box-shadow: 0 6px 14px rgba(0,0,0,.2); }
+
+  /* дорога до аула */
+  #road { left: 80px; top: 420px; width: 920px; height: 340px; }
+  #road .ln { position: absolute; left: 130px; right: 130px; top: 150px; height: 0; border-top: 8px dashed #cfd5e2; }
+  #road .lnfill { position: absolute; left: 130px; top: 149px; width: 660px; height: 10px; border-radius: 10px; background: var(--accent); transform-origin: left center; }
+  #road .pt { position: absolute; top: 104px; width: 100px; height: 100px; border-radius: 30px; display: grid; place-items: center; background: var(--accent-soft); }
+  #road .pt svg { width: 60px; height: 60px; fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+  #road .lb { position: absolute; top: 224px; width: 300px; font-size: 36px; font-weight: 700; }
+  #road .mid { position: absolute; left: 0; right: 0; top: 50px; text-align: center; font-size: 34px; font-weight: 600; color: var(--grey); }
+  #cour, #post { position: absolute; left: 150px; top: 124px; width: 60px; height: 60px; border-radius: 18px; border: 6px solid #fff; box-shadow: 0 8px 18px rgba(0,0,0,.22); }
+  #cour { background: #9aa1b0; }
+  #post { background: var(--hot); }
+  #kp { background: var(--accent); border-color: var(--accent); }
+  #kp .t, #kp .d { color: #fff; }
+  #kp .d { opacity: .85; }
+  #kp .ic { background: rgba(255,255,255,.18); }
+  #kp .ic svg { stroke: #fff; }
+  #kp .badge.ok { background: #fff; }
+  #kp .badge.ok svg { stroke: var(--accent); }
+
+  /* сеть */
+  #net { left: 80px; top: 680px; width: 920px; height: 560px; }
+  #net line { stroke: var(--accent); stroke-width: 6; stroke-linecap: round; opacity: .55; }
+  #net circle { fill: #fff; stroke: var(--accent); stroke-width: 7; }
+  #net circle.hub { fill: var(--hot); stroke: #fff; stroke-width: 8; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="glow"></div><div id="glow2"></div>
+
+  <!-- 1. Представь: Казпочта не вышла на работу -->
+  <div class="scene" id="s1">
+    <div class="pill abs" id="p1" style="left:80px; top:140px"><span class="dot"></span>Представь</div>
+    <div class="h"><div class="w">Один день</div><div class="w redtxt">без Казпочты</div></div>
+    <div class="card abs" id="power">
+      <div><div class="nm">Казпочта</div><div class="st"><div id="st-on" style="color:var(--green)">работает</div><div id="st-off" class="redtxt">не вышла на работу</div></div></div>
+      <div class="sw" id="sw1"><i></i></div>
+    </div>
+    <div class="row-center"><div class="pill dark" id="p1b" style="font-size:50px; padding:26px 48px">Всего на 1 день</div></div>
+  </div>
+
+  <!-- 2. Что случится -->
+  <div class="scene" id="s2">
+    <div class="h"><div class="w">Что случится?</div></div>
+    <div class="card item" style="top:470px"><div class="ic" data-icon="box"></div><div><div class="t"><span id="c55">0</span> посылок</div><div class="d">застряли в пути</div></div><div class="badge x"></div></div>
+    <div class="card item" style="top:740px"><div class="ic" data-icon="home"></div><div><div class="t">Пенсия</div><div class="d">бабушке в ауле не принесли</div></div><div class="badge x"></div></div>
+    <div class="card item" style="top:1010px"><div class="ic" data-icon="mail"></div><div><div class="t">Письма</div><div class="d">газеты, документы — встало</div></div><div class="badge x"></div></div>
+  </div>
+
+  <!-- 3. В селе почта — это всё -->
+  <div class="scene" id="s3">
+    <div class="h" style="font-size:108px"><div class="w">В маленьком селе</div><div class="w acc">почта — это:</div></div>
+    <div class="card item" style="top:560px"><div class="ic" data-icon="money"></div><div><div class="t">и банк</div><div class="d">получить и отправить деньги</div></div></div>
+    <div class="card item" style="top:830px"><div class="ic" data-icon="box"></div><div><div class="t">и доставка</div><div class="d">посылки из любого города</div></div></div>
+    <div class="card item" style="top:1100px"><div class="ic" data-icon="pin"></div><div><div class="t">и связь с миром</div><div class="d">письма, газеты, документы</div></div></div>
+  </div>
+
+  <!-- 4. Заметит вся страна. Но такого дня не бывает -->
+  <div class="scene" id="s4">
+    <div class="big" id="s4a"><div class="w">Один день.</div><div class="w">Это почувствует</div><div class="w redtxt">вся страна.</div></div>
+    <div class="big" id="s4b"><div class="w">Но такого дня</div><div class="w acc">не бывает.</div></div>
+    <div id="sw2wrap"><div class="sw" id="sw2"><i></i></div><div id="s4lab">Казпочта работает каждый день</div></div>
+  </div>
+
+  <!-- 5. Каждое утро -->
+  <div class="scene" id="s5">
+    <div class="h"><div class="w">Каждое утро</div></div>
+    <div class="card stat" style="top:430px"><div class="n" id="n5">0</div><div class="l">человек выходят на работу</div><div class="d">почтальоны, сортировщики, водители</div></div>
+    <div class="card abs" id="temp">
+      <div id="deg">−40°</div>
+      <div class="labs"><div id="cold" style="color:#1f8fff">мороз</div><div id="heat" style="color:#ff7a1a">жара</div></div>
+      <div id="tbar"></div><div id="tknob"></div>
+    </div>
+    <div class="row-center" style="top:1250px"><div class="pill dark" id="p5" style="font-size:46px; padding:24px 44px">3 000 км — из конца в конец страны</div></div>
+  </div>
+
+  <!-- 6. До каждого -->
+  <div class="scene" id="s6">
+    <div class="h"><div class="w">До <span class="acc">каждого</span></div></div>
+    <div class="card abs" id="road">
+      <div class="mid">сотни километров степи</div>
+      <div class="ln"></div><div class="lnfill"></div>
+      <div class="pt" style="left:50px" data-icon="people"></div><div class="pt" id="aul" style="right:50px" data-icon="home"></div>
+      <div class="lb" style="left:50px">город</div><div class="lb" style="right:50px; text-align:right">дальний аул</div>
+      <div id="cour"></div><div id="post"></div>
+    </div>
+    <div class="card item" id="pc" style="top:800px"><div class="ic" data-icon="box"></div><div><div class="t">Частный курьер</div><div class="d">ради одной посылки — невыгодно</div></div><div class="badge x"></div></div>
+    <div class="card item" id="kp" style="top:1070px"><div class="ic" data-icon="mail"></div><div><div class="t">Казпочта едет</div><div class="d">обязана доехать до каждого</div></div><div class="badge ok"></div></div>
+  </div>
+
+  <!-- 7. Масштаб -->
+  <div class="scene" id="s7">
+    <div class="h"><div class="w">Масштаб</div></div>
+    <div class="card stat" style="top:430px"><div class="n" id="n7a">0 млн</div><div class="l">посылок в год</div><div class="d">почти по одной на каждого жителя страны</div></div>
+    <div class="card stat" style="top:790px"><div class="n" id="n7b">0</div><div class="l">отделений по всей стране</div><div class="d">от мегаполиса до самого маленького аула</div></div>
+    <div class="row-center" style="top:1180px"><div class="pill ch">мегаполис</div><div class="pill ch">город</div><div class="pill ch">село</div><div class="pill ch">аул</div></div>
+  </div>
+
+  <!-- 8. Люди почты -->
+  <div class="scene" id="s8">
+    <div class="h"><div class="w">Люди <span class="acc">почты</span></div></div>
+    <div class="card item" style="top:470px"><div class="ic" data-icon="mail"></div><div><div class="t">Почтальон</div><div class="d">идёт к каждой двери</div></div></div>
+    <div class="card item" style="top:740px"><div class="ic" data-icon="box"></div><div><div class="t">Сортировщик</div><div class="d">разбирает горы посылок</div></div></div>
+    <div class="card item" style="top:1010px"><div class="ic" data-icon="pin"></div><div><div class="t">Водитель</div><div class="d">везёт через всю степь</div></div></div>
+    <div class="row-center" style="top:1310px"><div class="pill blue" id="p8" style="font-size:44px; padding:24px 40px">Благодаря им страна — одна страна</div></div>
+  </div>
+
+  <!-- 9. Финал -->
+  <div class="scene" id="s9">
+    <div class="h"><div class="w">Казпочта</div><div class="w">соединяет</div><div class="w acc">Казахстан.</div></div>
+    <svg class="abs" id="net" viewBox="0 0 920 560"></svg>
+    <div class="row-center" style="top:1300px"><div class="pill dark" id="p9" style="font-size:44px; padding:24px 40px">Спасибо каждому, кто там работает</div></div>
+  </div>
+
+  <div id="caps"></div>
+</div>
+
+<script src="../node_modules/gsap/dist/gsap.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="vo.js"></script>
+<script>
+  const { tl, cue } = K;
+  const T = (id) => VO[id].t;                      // начало фразы
+  const P = (id, f) => VO[id].t + VO[id].d * f;    // момент внутри фразы (доля от 0 до 1)
+  const X = '<svg viewBox="0 0 48 48"><path d="M12 12 L36 36 M36 12 L12 36"/></svg>';
+  const OK = '<svg viewBox="0 0 48 48"><path d="M10 25 L20 35 L38 14"/></svg>';
+  document.querySelectorAll(".badge.x").forEach((b) => (b.innerHTML = X));
+  document.querySelectorAll(".badge.ok").forEach((b) => (b.innerHTML = OK));
+
+  // Субтитры: каждая фраза видна, пока её произносит голос.
+  const caps = document.querySelector("#caps");
+  Object.values(VO).forEach((v) => {
+    const el = document.createElement("div");
+    el.className = "cap";
+    el.innerHTML = `<span>${v.text}</span>`;
+    caps.appendChild(el);
+    tl.fromTo(el, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.16, ease: "power2.out" }, v.t - 0.05);
+    tl.to(el, { autoAlpha: 0, duration: 0.1 }, v.t + v.d + 0.08);
+  });
+
+  const bad = (el, at) => {   // красный крестик
+    tl.from(el, { scale: 0, rotation: -90, duration: 0.4, ease: "back.out(3)" }, at);
+    cue("thud", at, { gain: 0.45 });
+  };
+  // Тема: светлая сине-белая и тёмная красная («день без почты»).
+  const LIGHT = { "--bg": "rgb(245,247,251)", "--card": "rgb(255,255,255)", "--ink": "rgb(15,18,32)", "--line": "rgb(230,233,240)", "--grey": "rgb(138,143,156)", "--accent": "rgb(31,91,255)", "--accent-soft": "rgb(227,235,255)" };
+  const DARK = { "--bg": "rgb(16,9,11)", "--card": "rgb(36,20,23)", "--ink": "rgb(255,241,238)", "--line": "rgb(66,36,40)", "--grey": "rgb(196,152,150)", "--accent": "rgb(255,74,61)", "--accent-soft": "rgb(74,29,31)" };
+  gsap.set(document.documentElement, LIGHT);
+  const theme = (at, dark) => tl.to(document.documentElement, { ...(dark ? DARK : LIGHT), duration: 0.45, ease: "power2.out" }, at);
+  const flip = (sw, at, on) => {   // выключатель и цвет свечения
+    tl.to(sw + " i", { x: on ? 100 : 0, duration: 0.3, ease: "back.out(2)" }, at);
+    tl.to(sw, { backgroundColor: on ? "#1fbf63" : "#ff4a3d", duration: 0.3 }, at);
+    tl.to("#glow", { opacity: on ? 1 : 0, duration: 0.6 }, at);
+    tl.to("#glow2", { opacity: on ? 0 : 1, duration: 0.6 }, at);
+    cue("click", at, { gain: 0.9 });
+    theme(at, !on);
+    cue("mood", at, { mode: on ? "hero" : "dark" });
+    if (!on) {   // удар, тряска экрана и секунда тишины
+      cue("impact", at, { gain: 1.0 });
+      cue("cut", at + 0.05, { dur: 1.1 });
+      tl.to("#stage", { x: 20, duration: 0.05, yoyo: true, repeat: 7, ease: "sine.inOut" }, at);
+    } else {
+      cue("riser", at - 1.3, { dur: 1.3, gain: 0.34 });
+      cue("impact", at, { gain: 0.55 });
+    }
+  };
+  const starts = { s1: 0, s2: T("2a") - 0.25, s3: T("3a") - 0.25, s4: T("4a") - 0.25, s5: T("5a") - 0.25, s6: T("6a") - 0.25, s7: T("7a") - 0.25, s8: T("8a") - 0.25, s9: T("9a") - 0.25 };
+  const ids = Object.keys(starts);
+  ids.forEach((id, i) => {
+    K.scene("#" + id, starts[id]);
+    if (i < ids.length - 1) K.out("#" + id, starts[ids[i + 1]] - 0.32);
+  });
+
+  // ---------- 1 ----------
+  K.pop("#p1", 0.1);
+  K.up("#s1 .w", 0.3);
+  K.card("#power", 0.9);
+  gsap.set("#sw1 i", { x: 100 });
+  gsap.set("#st-off", { opacity: 0, y: 16 });
+  const off = P("1a", 0.66);
+  flip("#sw1", off, false);
+  cue("thud", off + 0.02, { gain: 0.8 });
+  tl.to("#st-on", { opacity: 0, y: -16, duration: 0.2 }, off);
+  tl.to("#st-off", { opacity: 1, y: 0, duration: 0.25 }, off + 0.12);
+  tl.to("#power", { x: 14, duration: 0.05, yoyo: true, repeat: 5, ease: "sine.inOut" }, off);
+  K.pop("#p1b", T("1b"));
+
+  // ---------- 2 ----------
+  K.up("#s2 .w", starts.s2 + 0.05);
+  const it2 = document.querySelectorAll("#s2 .item"), b2 = document.querySelectorAll("#s2 .badge");
+  ["2a", "2b", "2c"].forEach((id, i) => {
+    K.card(it2[i], T(id) - 0.05);
+    bad(b2[i], P(id, 0.6));
+    tl.to(it2[i], { x: 12, duration: 0.05, yoyo: true, repeat: 3, ease: "sine.inOut" }, P(id, 0.6));
+  });
+  K.count("#c55", 55000, T("2a") + 0.1, 1.0);
+
+  // ---------- 3 ----------
+  K.up("#s3 .w", starts.s3 + 0.05);
+  const it3 = document.querySelectorAll("#s3 .item");
+  [0.42, 0.62, 0.8].forEach((f, i) => {
+    K.card(it3[i], P("3a", f));
+    tl.from(it3[i].querySelector(".ic"), { scale: 0.3, rotation: -25, duration: 0.5, ease: "back.out(3)" }, P("3a", f) + 0.12);
+  });
+
+  // ---------- 4 ----------
+  gsap.set("#sw2", { backgroundColor: "#ff4a3d" });
+  gsap.set("#s4lab", { opacity: 0, y: 30 });
+  K.up("#s4a .w", T("4a") - 0.05, { stagger: 0.3 });
+  tl.from("#sw2wrap .sw", { scale: 0.6, opacity: 0, duration: 0.5, ease: "back.out(2)" }, T("4a") + 0.4);
+  tl.to("#s4a", { y: -60, opacity: 0, duration: 0.22, ease: "power2.in" }, T("4b") - 0.3);
+  K.up("#s4b .w", T("4b") - 0.05, { stagger: 0.25 });
+  const on = P("4b", 0.55);
+  flip("#sw2", on, true);
+  cue("ding", on, { f: 523.25, gain: 0.3 });
+  cue("ding", on + 0.04, { f: 783.99, gain: 0.26 });
+  cue("ding", on + 0.08, { f: 1046.5, gain: 0.22 });
+  tl.to("#s4lab", { opacity: 1, y: 0, duration: 0.4, ease: "back.out(2)" }, on + 0.15);
+
+  // ---------- 5 ----------
+  K.up("#s5 .w", starts.s5 + 0.05);
+  K.card("#s5 .stat", T("5a"));
+  K.count("#n5", 20000, P("5a", 0.3), 1.3, { prefix: "≈ " });
+  K.card("#temp", T("5b") - 0.25);
+  gsap.set("#heat", { opacity: 0, y: 20 });
+  const sign = (n) => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(Math.round(n)) + "°";
+  const t5 = P("5b", 0.42), d5 = 1.1;
+  K.count("#deg", 40, t5, d5, { from: -40, show: sign, ease: "power2.inOut", f: 987.77 });
+  cue("riser", t5, { dur: d5, gain: 0.2 });
+  tl.to("#deg", { color: "#ff7a1a", duration: d5, ease: "power2.inOut" }, t5);
+  tl.to("#tknob", { x: 758, duration: d5, ease: "power2.inOut" }, t5);
+  tl.to("#cold", { opacity: 0, y: -20, duration: 0.25 }, t5 + d5 * 0.4);
+  tl.to("#heat", { opacity: 1, y: 0, duration: 0.25 }, t5 + d5 * 0.55);
+  K.pop("#p5", T("5c") + 0.1);
+
+  // ---------- 6 ----------
+  K.up("#s6 .w", starts.s6 + 0.05);
+  K.card("#road", starts.s6 + 0.25);
+  gsap.set("#road .lnfill", { scaleX: 0 });
+  gsap.set("#post", { opacity: 0 });
+  K.card("#pc", P("6a", 0.05));
+  tl.to("#cour", { x: 210, duration: 0.9, ease: "power2.out" }, P("6a", 0.15));
+  tl.to("#cour", { x: 222, duration: 0.05, yoyo: true, repeat: 5 }, P("6a", 0.5));
+  bad("#pc .badge", P("6a", 0.5));
+  tl.to("#cour", { x: 0, opacity: 0, duration: 0.7, ease: "power2.in" }, P("6a", 0.66));
+  K.card("#kp", T("6b") - 0.05);
+  const go = T("6b") + 0.25, ride = VO["6b"].d * 0.78;
+  tl.to("#post", { opacity: 1, duration: 0.15 }, go - 0.1);
+  tl.to("#post", { x: 640, duration: ride, ease: "power1.inOut" }, go);
+  tl.to("#road .lnfill", { scaleX: 1, duration: ride, ease: "power1.inOut" }, go);
+  cue("riser", go, { dur: ride, gain: 0.16 });
+  tl.from("#kp .badge", { scale: 0, duration: 0.4, ease: "back.out(3)" }, go + ride);
+  tl.to("#aul", { scale: 1.3, duration: 0.2, ease: "power2.out", yoyo: true, repeat: 1 }, go + ride);
+  cue("ding", go + ride, { f: 783.99, gain: 0.3 });
+  cue("ding", go + ride + 0.05, { f: 1174.66, gain: 0.24 });
+
+  // ---------- 7 ----------
+  K.up("#s7 .w", starts.s7 + 0.05);
+  const st7 = document.querySelectorAll("#s7 .stat");
+  K.card(st7[0], T("7a") - 0.05);
+  K.count("#n7a", 20, T("7a") + 0.15, 1.1, { suffix: " млн", f: 783.99 });
+  K.card(st7[1], T("7b") - 0.05);
+  K.count("#n7b", 2000, T("7b") + 0.15, 1.1, { suffix: "+", f: 880 });
+  K.pop("#s7 .ch", P("7b", 0.42), { stagger: 0.32 });
+
+  // ---------- 8 ----------
+  K.up("#s8 .w", starts.s8 + 0.05);
+  const it8 = document.querySelectorAll("#s8 .item");
+  [0.0, 0.34, 0.68].forEach((f, i) => {
+    K.card(it8[i], P("8a", f));
+    tl.from(it8[i].querySelector(".ic"), { scale: 0.3, rotation: -25, duration: 0.5, ease: "back.out(3)" }, P("8a", f) + 0.12);
+  });
+  K.pop("#p8", P("8b", 0.25));
+  tl.to("#p8", { scale: 1.05, duration: 0.35, ease: "sine.inOut", yoyo: true, repeat: 3 }, P("8b", 0.25) + 0.6);
+
+  // ---------- 9 ----------
+  K.up("#s9 .w", starts.s9 + 0.05, { stagger: 0.22 });
+  const N = [[90,120],[300,60],[520,150],[760,70],[860,260],[640,330],[400,300],[180,330],[280,490],[560,500],[800,470]];
+  const E = [[6,1],[6,2],[6,7],[6,8],[6,9],[6,5],[0,1],[1,2],[2,3],[3,4],[2,5],[5,4],[0,7],[7,8],[5,9],[9,10],[4,10]];
+  const net = document.querySelector("#net"), NS = "http://www.w3.org/2000/svg";
+  E.forEach(([a, b]) => {
+    const l = document.createElementNS(NS, "line");
+    l.setAttribute("x1", N[a][0]); l.setAttribute("y1", N[a][1]); l.setAttribute("x2", N[b][0]); l.setAttribute("y2", N[b][1]);
+    const len = Math.hypot(N[a][0] - N[b][0], N[a][1] - N[b][1]);
+    l.style.strokeDasharray = len; l.style.strokeDashoffset = len;
+    net.appendChild(l);
+  });
+  N.forEach(([x, y], i) => {
+    const c = document.createElementNS(NS, "circle");
+    c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", i === 6 ? 34 : 20);
+    if (i === 6) c.setAttribute("class", "hub");
+    c.style.transformOrigin = `${x}px ${y}px`;
+    net.appendChild(c);
+  });
+  const n0 = P("9a", 0.2);
+  tl.from("#net circle.hub", { scale: 0, duration: 0.5, ease: "back.out(3)" }, n0);
+  cue("thud", n0, { gain: 0.6 });
+  tl.to("#net line", { strokeDashoffset: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }, n0 + 0.3);
+  tl.from("#net circle:not(.hub)", { scale: 0, duration: 0.4, ease: "back.out(3)", stagger: 0.14 }, n0 + 0.6);
+  for (let i = 0; i < 10; i++) cue("pop", n0 + 0.6 + i * 0.14, { gain: 0.2, pitch: 1.2 + i * 0.08, pan: -0.5 + i * 0.1 });
+  tl.to("#net circle.hub", { scale: 1.25, duration: 0.5, ease: "sine.inOut", yoyo: true, repeat: 7 }, n0 + 2.2);
+  K.pop("#p9", T("9b") + 0.1);
+  cue("ding", T("9b") + 0.1, { f: 523.25, gain: 0.26 });
+  cue("ding", T("9b") + 0.15, { f: 783.99, gain: 0.2 });
+
+  K.done(VO_END);
+</script>
+</body>
+</html>
